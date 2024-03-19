@@ -1,7 +1,9 @@
 import express from 'express';
 import initApp from './src/modules/app.router.js';
+import 'dotenv/config.js'
+
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT;
 
 initApp(app, express);
 app.listen(PORT, ()=>{
