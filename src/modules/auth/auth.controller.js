@@ -1,12 +1,14 @@
 import userModel from "../../../db/models/User.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { signinSchema, signupSchema } from "./auth.validation.js";
 
 export const signup = async (req, res) => {
   const { username, email, password } = req.body;
+
   const user = await userModel.findOne({ email });
   if (user) {
-    return res.json({ message: "email already exist" });
+    return res.status(409).json({ message: "email already exist" });
   }
   const hashedPassword = await bcrypt.hash(
     password,
@@ -20,7 +22,7 @@ export const signup = async (req, res) => {
   if (!newUser) {
     return res.json({ message: "error while creating user" });
   }
-  return res.json({ message: "success", newUser });
+  return res.status(201).json({ message: "success", newUser });
 };
 
 export const signin = async (req, res) => {
