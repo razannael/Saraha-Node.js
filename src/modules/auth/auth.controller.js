@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { signinSchema, signupSchema } from "./auth.validation.js";
 
 export const signup = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { userName, email, password } = req.body;
 
   const user = await userModel.findOne({ email });
   if (user) {
@@ -15,7 +15,7 @@ export const signup = async (req, res) => {
     parseInt(process.env.SALTROUND)
   );
   const newUser = await userModel.create({
-    username,
+    userName,
     email,
     password: hashedPassword,
   });
