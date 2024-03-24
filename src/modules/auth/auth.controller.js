@@ -2,6 +2,7 @@ import userModel from "../../../db/models/User.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { signinSchema, signupSchema } from "./auth.validation.js";
+import SendEmail from "../../utils/sendEmail.js";
 
 export const signup = async (req, res) => {
   const { userName, email, password } = req.body;
@@ -22,6 +23,16 @@ export const signup = async (req, res) => {
   if (!newUser) {
     return res.json({ message: "error while creating user" });
   }
+  const html = `
+  <h2>Infinity Light</h2>
+  <p>Welcome Message</p>
+  <p>Hello ${userName}</p>
+  <ul>
+     <li>Confirm your Email</li>
+     <li>Login</li>
+  </ul>`;
+
+  await SendEmail(email, 'Welcome Message', html);
   return res.status(201).json({ message: "success", newUser });
 };
 
