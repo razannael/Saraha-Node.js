@@ -23,14 +23,11 @@ export const signup = async (req, res) => {
   if (!newUser) {
     return res.json({ message: "error while creating user" });
   }
+  const token = await jwt.sign({ email }, process.env.CONFIRMEMAILTOKEN);
   const html = `
   <h2>Infinity Light</h2>
-  <p>Welcome Message</p>
-  <p>Hello ${userName}</p>
-  <ul>
-     <li>Confirm your Email</li>
-     <li>Login</li>
-  </ul>`;
+  <p>Welcome ${userName}</p>
+  <a href='http://localhost:4000/auth/confirmEmail/${token}'>Confirm Email</a>`;
 
   await SendEmail(email, 'Welcome Message', html);
   return res.status(201).json({ message: "success", newUser });
@@ -42,6 +39,9 @@ export const signin = async (req, res) => {
   if (!user) {
     return res.json({ message: "email is not exist" });
   }
+  if(!user.confirmEmail){
+    return res.json({ message: "please confirm your email" });
+  }
   const match = await bcrypt.compare(password, user.password);
   if (!match) {
     return res.json({ message: "invalid password" });
@@ -49,3 +49,12 @@ export const signin = async (req, res) => {
   const token = jwt.sign({ id: user._id }, process.env.LOGINSIG);
   return res.json({ message: "success", token });
 };
+
+export const confirmEmail = async (req, res) => {
+    const { token } = req.params;
+    const decoded = await jwt.verify(token, process.env.CONFIRMEMAILTOKEN);
+    const user = await userModel.updateOne({ email: decoded.email },{confirmEmail:true},{new:true});
+    if(user.modifiedCount > 0){
+        return res.json({message:"success"})
+    }
+  }
