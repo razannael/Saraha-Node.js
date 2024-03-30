@@ -23,19 +23,23 @@ export const signup = async (req, res) => {
   if (!newUser) {
     return res.json({ message: "error while creating user" });
   }
-  const token = await jwt.sign({ email }, process.env.CONFIRMEMAILTOKEN);
+  const token = await jwt.sign({ email }, process.env.CONFIRMEMAILTOKEN,{expiresIn:'1h'});
+  const refresToken = await jwt.sign({ email }, process.env.CONFIRMEMAILTOKEN, {expiresIn:'1d'});
   const html = `
   <h2>Infinity Light</h2>
   <p>Welcome ${userName}</p>
-  <a href='http://localhost:4000/auth/confirmEmail/${token}'>Confirm Email</a>`;
-
+  <a href='${req.protocol}://${req.headers.host}/auth/confirmEmail/${token}'>Confirm Email</a>
+  <br/>
+  <a href='http://localhost:4000/auth/newConfirmEmail/${refresToken}'>Resend Confirm Email</a>
+  `;
+   
   await SendEmail(email, 'Welcome Message', html);
   return res.status(201).json({ message: "success", newUser });
 };
 
 export const signin = async (req, res) => {
   const { email, password } = req.body;
-  const user = await userModel.findOne({ email }).select("userName password");
+  const user = await userModel.findOne({ email }).select("userName password confirmEmail");
   if (!user) {
     return res.json({ message: "email is not exist" });
   }
